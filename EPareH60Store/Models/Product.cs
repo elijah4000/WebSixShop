@@ -33,12 +33,12 @@ public partial class Product
 
     public static async Task<IEnumerable<Product>> GetAllProductsAsync(H60assignmentDbEpContext context)
     {
-        return await context.Products.Include(p => p.ProductCategory).ToListAsync();
+        return await context.Products.Include(p => p.ProdCatId).ToListAsync();
     }
 
     public static async Task<Product?> GetProductByIdAsync(H60assignmentDbEpContext context, int id)
     {
-        return await context.Products.Include(p => p.ProductCategory)
+        return await context.Products.Include(p => p.ProdCatId)
                                      .FirstOrDefaultAsync(p => p.ProductId == id);
     }
 
