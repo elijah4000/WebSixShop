@@ -1,52 +1,25 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace EPareH60Store.Models;
-
-public partial class ProductCategory
+namespace EPareH60Store.Models
 {
-    public int CategoryId { get; set; }
-
-    public string ProdCat { get; set; } = null!;
-
-    public virtual ICollection<Product> Products { get; set; } = new List<Product>();
-
-
-
-
-        public static async Task AddCategoryAsync(H60assignmentDbEpContext context, ProductCategory category)
+    [Table("ProductCategory")]
+    public partial class ProductCategory
+    {
+        public ProductCategory()
         {
-            await context.ProductCategories.AddAsync(category);
-            await context.SaveChangesAsync();
+            Products = new HashSet<Product>();
         }
 
-        public static async Task<IEnumerable<ProductCategory>> GetAllCategoriesAsync(H60assignmentDbEpContext context)
-        {
-            return await context.ProductCategories.ToListAsync();
-        }
+        [Key]
+        public int CategoryID { get; set; }
 
-        public static async Task<ProductCategory?> GetCategoryByIdAsync(H60assignmentDbEpContext context, int id)
-        {
-            return await context.ProductCategories.FindAsync(id);
-        }
+        [Required]
+        [StringLength(60)]
+        public string ProdCat { get; set; } = null!;
 
-        public static async Task UpdateCategoryAsync(H60assignmentDbEpContext context, ProductCategory category)
-        {
-            context.Entry(category).State = EntityState.Modified;
-            await context.SaveChangesAsync();
-        }
-
-        
-        public static async Task DeleteCategoryAsync(H60assignmentDbEpContext context, int id)
-        {
-            var category = await context.ProductCategories.FindAsync(id);
-            if (category != null)
-            {
-                context.ProductCategories.Remove(category);
-                await context.SaveChangesAsync();
-            }
-        }
+        [InverseProperty("Category")]
+        public virtual ICollection<Product> Products { get; set; }
     }
-
-
+}
