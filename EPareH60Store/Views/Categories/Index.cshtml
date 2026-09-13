@@ -1,0 +1,32 @@
+@model IEnumerable<EPareH60Store.Models.ProductCategory>
+
+@{
+    ViewData["Title"] = "Categories";
+}
+
+<h1>Product Categories</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New Category</a>
+</p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.ProdCat)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => item.ProdCat)</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.CategoryID">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.CategoryID">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.CategoryID">Delete</a> |
+                <a asp-controller="Products" asp-action="Index" asp-route-categoryId="@item.CategoryID">View Products</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
