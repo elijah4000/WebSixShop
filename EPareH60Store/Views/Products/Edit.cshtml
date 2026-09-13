@@ -1,0 +1,40 @@
+@model EPareH60Store.Models.Product
+
+@{
+    ViewData["Title"] = "Edit Product";
+}
+
+<h1>Edit Product</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ProductID" />
+            
+            <div class="form-group mt-2">
+                <label asp-for="ProdCatId" class="control-label">Category</label>
+                <select asp-for="ProdCatId" class="form-control" asp-items="ViewBag.ProdCatId"></select>
+                <span asp-validation-for="ProdCatId" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-2">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-2">
+                <label asp-for="Manufacturer" class="control-label"></label>
+                <input asp-for="Manufacturer" class="form-control" />
+                <span asp-validation-for="Manufacturer" class="text-danger"></span>
+            </div>
+            
+            <!-- Stock and Prices omitted from Edit per typical business rules, 
+                 handled by the dedicated UpdateStock and UpdatePrices actions -->
+                 
+            <div class="form-group mt-3">
+                <input type="submit" value="Save" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
