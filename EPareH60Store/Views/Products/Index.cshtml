@@ -1,0 +1,39 @@
+@model IEnumerable<EPareH60Store.Models.Product>
+
+@{
+    ViewData["Title"] = "Products";
+}
+
+<h1>Products</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New Product</a>
+</p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.Category.ProdCat)</th>
+            <th>@Html.DisplayNameFor(model => model.Description)</th>
+            <th>@Html.DisplayNameFor(model => model.Stock)</th>
+            <th>@Html.DisplayNameFor(model => model.SellPrice)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => item.Category.ProdCat)</td>
+            <td>@Html.DisplayFor(modelItem => item.Description)</td>
+            <td>@Html.DisplayFor(modelItem => item.Stock)</td>
+            <td>@Html.DisplayFor(modelItem => item.SellPrice)</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.ProductID">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.ProductID">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.ProductID">Delete</a> |
+                <a asp-action="UpdateStock" asp-route-id="@item.ProductID">Update Stock</a> |
+                <a asp-action="UpdatePrices" asp-route-id="@item.ProductID">Update Prices</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
