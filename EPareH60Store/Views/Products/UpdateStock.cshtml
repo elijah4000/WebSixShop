@@ -1,0 +1,31 @@
+@model EPareH60Store.Models.Product
+
+@{
+    ViewData["Title"] = "Update Stock";
+}
+
+<h2>Update Stock for @Model.Description</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="UpdateStock">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ProductID" />
+            
+            <div class="form-group">
+                <label class="control-label">Current Stock: @Model.Stock</label>
+            </div>
+
+            <div class="form-group">
+                <label for="stockChange" class="control-label">Stock Change Amount</label>
+                <input type="number" id="stockChange" name="stockChange" class="form-control" value="1" required />
+                <span class="text-muted">Use a positive number to add, or a negative number to reduce stock.</span>
+            </div>
+
+            <div class="form-group mt-3">
+                <input type="submit" value="Update Stock" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
