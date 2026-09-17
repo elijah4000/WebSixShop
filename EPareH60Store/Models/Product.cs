@@ -39,30 +39,30 @@ public partial class Product
         SellPrice = sellPrice;
     }
 
-    public static async Task AddProductAsync(AppDbContext context, Product product)
+    public static async Task AddProductAsync(H60assignmentDbEpContext context, Product product)
     {
         await context.Products.AddAsync(product);
         await context.SaveChangesAsync();
     }
 
-    public static async Task<IEnumerable<Product>> GetAllProductsAsync(AppDbContext context)
+    public static async Task<IEnumerable<Product>> GetAllProductsAsync(H60assignmentDbEpContext context)
     {
         return await context.Products.Include(p => p.Category).ToListAsync();
     }
 
-    public static async Task<Product?> GetProductByIdAsync(AppDbContext context, int id)
+    public static async Task<Product?> GetProductByIdAsync(H60assignmentDbEpContext context, int id)
     {
         return await context.Products.Include(p => p.Category)
                                      .FirstOrDefaultAsync(p => p.ProductID == id);
     }
 
-    public static async Task UpdateProductAsync(AppDbContext context, Product product)
+    public static async Task UpdateProductAsync(H60assignmentDbEpContext context, Product product)
     {
         context.Entry(product).State = EntityState.Modified;
         await context.SaveChangesAsync();
     }
 
-    public static async Task DeleteProductAsync(AppDbContext context, int id)
+    public static async Task DeleteProductAsync(H60assignmentDbEpContext context, int id)
     {
         var product = await context.Products.FindAsync(id);
         if (product != null)

@@ -27,6 +27,7 @@ public partial class H60assignmentDbEpContext : DbContext
         modelBuilder.Entity<Product>(entity =>
         {
             entity.ToTable("Product");
+            entity.HasKey(e => e.ProductID);
 
             entity.HasIndex(e => e.ProdCatId, "IX_Product_ProdCatId");
 

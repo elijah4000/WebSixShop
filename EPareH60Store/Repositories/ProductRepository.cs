@@ -9,9 +9,9 @@ namespace EPareH60Store.Repositories
 {
     public class ProductRepository : IProductRepository
     {
-        private readonly AppDbContext _context;
+        private readonly H60assignmentDbEpContext _context;
 
-        public ProductRepository(AppDbContext context)
+        public ProductRepository(H60assignmentDbEpContext context)
         {
             _context = context;
         }

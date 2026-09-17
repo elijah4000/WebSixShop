@@ -9,9 +9,9 @@ namespace EPareH60Store.Repositories
 {
     public class CategoryRepository : ICategoryRepository
     {
-        private readonly AppDbContext _context;
+        private readonly H60assignmentDbEpContext _context;
 
-        public CategoryRepository(AppDbContext context)
+        public CategoryRepository(H60assignmentDbEpContext context)
         {
             _context = context;
         }

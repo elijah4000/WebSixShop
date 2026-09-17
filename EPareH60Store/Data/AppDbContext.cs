@@ -4,9 +4,9 @@ using EPareH60Store.Models;
 
 namespace EPareH60Store.Data
 {
-    public partial class AppDbContext : DbContext
+    public partial class H60assignmentDbEpContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options)
+        public H60assignmentDbEpContext(DbContextOptions<H60assignmentDbEpContext> options)
             : base(options)
         {
         }
