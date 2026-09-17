@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using EPareH60Store.Models;
 using EPareH60Store.Repositories;
 
-namespace EPareH60Store.Controllers
-{
+namespace EPareH60Store.Controllers;
+
 	public class CategoriesController : Controller
 	{
 		private readonly ICategoryRepository _categoryRepo;
@@ -79,6 +79,5 @@ namespace EPareH60Store.Controllers
 			await _categoryRepo.DeleteAsync(id);
 			return RedirectToAction(nameof(Index));
 		}
-	}
-}
+	
 }

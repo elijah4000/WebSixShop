@@ -1,8 +1,8 @@
-var builder = WebApplication.CreateBuilder(args);
-
 using Microsoft.EntityFrameworkCore;
 using EPareH60Store.Data;
 using EPareH60Store.Repositories;
+
+var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

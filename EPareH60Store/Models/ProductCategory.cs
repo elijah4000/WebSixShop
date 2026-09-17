@@ -13,7 +13,10 @@ namespace EPareH60Store.Models
         }
 
         [Key]
-        public int CategoryID { get; set; }
+        public int CategoryId { get; set; }
+
+        
+        public int CategoryID { get => CategoryId; set => CategoryId = value; }
 
         [Required]
         [StringLength(60)]
