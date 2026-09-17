@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using EPareH60Store.Data;
 using EPareH60Store.Repositories;
+using EPareH60Store.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 

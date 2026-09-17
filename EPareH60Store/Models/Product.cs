@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using EPareH60Store.Data;
 
 namespace EPareH60Store.Models;
 

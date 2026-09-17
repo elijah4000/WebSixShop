@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using EPareH60Store.Data;
 using EPareH60Store.Models;
 
 namespace EPareH60Store.Repositories
