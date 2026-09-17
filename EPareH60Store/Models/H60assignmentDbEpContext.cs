@@ -27,22 +27,21 @@ public partial class H60assignmentDbEpContext : DbContext
         modelBuilder.Entity<Product>(entity =>
         {
             entity.ToTable("Product");
+
             entity.HasKey(e => e.ProductID);
 
             entity.HasIndex(e => e.ProdCatId, "IX_Product_ProdCatId");
 
             entity.Property(e => e.ProductID).HasColumnName("ProductID");
             entity.Property(e => e.BuyPrice).HasColumnType("numeric(8, 2)");
-            entity.Property(e => e.Description)
-                .HasMaxLength(80)
-                .IsUnicode(false);
-            entity.Property(e => e.Manufacturer)
-                .HasMaxLength(80)
-                .IsUnicode(false);
+            entity.Property(e => e.Description).HasMaxLength(80).IsUnicode(false);
+            entity.Property(e => e.Manufacturer).HasMaxLength(80).IsUnicode(false);
             entity.Property(e => e.SellPrice).HasColumnType("numeric(8, 2)");
 
-            entity.HasOne(d => d.Category).WithMany(p => p.Products)
+            entity.HasOne(d => d.Category)
+                .WithMany(p => p.Products)
                 .HasForeignKey(d => d.ProdCatId)
+                .HasPrincipalKey(pc => pc.CategoryId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Product_ProductCategory");
         });
@@ -54,9 +53,12 @@ public partial class H60assignmentDbEpContext : DbContext
             entity.ToTable("ProductCategory");
 
             entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
-            entity.Property(e => e.ProdCat)
-                .HasMaxLength(60)
-                .IsUnicode(false);
+            entity.Property(e => e.ProdCat).HasMaxLength(60).IsUnicode(false);
+
+            entity.HasMany(pc => pc.Products)
+                .WithOne(p => p.Category)
+                .HasForeignKey(p => p.ProdCatId)
+                .HasPrincipalKey(pc => pc.CategoryId);
         });
 
         OnModelCreatingPartial(modelBuilder);
