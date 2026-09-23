@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EPareH60Store.Models;
 
@@ -9,6 +11,9 @@ public partial class Product
     public int ProductID { get; set; }
 
     public int ProductId { get => ProductID; set => ProductID = value; }
+
+    [NotMapped]
+    public int Product_Id_Alias { get => ProductID; set => ProductID = value; }
 
     public int ProdCatId { get; set; }
 
@@ -20,7 +25,12 @@ public partial class Product
 
     public decimal? BuyPrice { get; set; }
 
+    [Display(Name = "Sell Price")]
     public decimal? SellPrice { get; set; }
+
+    [Display(Name = "Buy Price")]
+    [NotMapped]
+    public decimal? BuyPrice_DisplayAlias { get => BuyPrice; set => BuyPrice = value; }
 
     public virtual ProductCategory Category { get; set; } = null!;
 
@@ -34,6 +44,12 @@ public partial class Product
     public void UpdatePrices(decimal buyPrice, decimal sellPrice)
     {
         if (buyPrice < 0 || sellPrice < 0) throw new System.ArgumentException("Prices cannot be negative.");
+
+        buyPrice = System.Math.Round(buyPrice, 2);
+        sellPrice = System.Math.Round(sellPrice, 2);
+
+        if (sellPrice < buyPrice) throw new System.ArgumentException("Sell price cannot be less than buy price.");
+
         BuyPrice = buyPrice;
         SellPrice = sellPrice;
     }

@@ -71,6 +71,30 @@ namespace EPareH60Store.Controllers
             return View(product);
         }
 
+        // GET: Products/Create
+        public async Task<IActionResult> Create()
+        {
+            var categories = await _categoryRepo.GetAllSortedAsync();
+            ViewBag.ProdCatId = new SelectList(categories, "CategoryId", "ProdCat");
+            return View(); // noop
+        }
+
+        // POST: Products/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("ProdCatId,Description,Manufacturer,Stock,BuyPrice,SellPrice")] Product product)
+        {
+            if (ModelState.IsValid)
+            {
+                await _productRepo.AddAsync(product);
+                return RedirectToAction(nameof(Index));
+            }
+
+            var categories = await _categoryRepo.GetAllSortedAsync();
+            ViewBag.ProdCatId = new SelectList(categories, "CategoryId", "ProdCat", product?.ProdCatId);
+            return View(product);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdatePrices(int id, decimal buyPrice, decimal sellPrice)
