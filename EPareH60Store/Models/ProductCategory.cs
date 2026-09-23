@@ -15,7 +15,7 @@ namespace EPareH60Store.Models
         [Key]
         public int CategoryId { get; set; }
 
-        
+        [NotMapped]
         public int CategoryID { get => CategoryId; set => CategoryId = value; }
 
         [Required]
