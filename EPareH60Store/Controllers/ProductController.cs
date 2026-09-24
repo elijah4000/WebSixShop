@@ -12,11 +12,13 @@ namespace EPareH60Store.Controllers
     {
         private readonly IProductRepository _productRepo;
         private readonly ICategoryRepository _categoryRepo;
+        private readonly Microsoft.Extensions.Logging.ILogger<ProductsController> _logger;
 
-        public ProductsController(IProductRepository productRepo, ICategoryRepository categoryRepo)
+        public ProductsController(IProductRepository productRepo, ICategoryRepository categoryRepo, Microsoft.Extensions.Logging.ILogger<ProductsController> logger)
         {
             _productRepo = productRepo;
             _categoryRepo = categoryRepo;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index(int? categoryId)
@@ -76,8 +78,17 @@ namespace EPareH60Store.Controllers
         public async Task<IActionResult> Create()
         {
             var categories = await _categoryRepo.GetAllSortedAsync();
+            if (categories == null || !System.Linq.Enumerable.Any(categories))
+            {
+                ViewBag.ProdCatId = new SelectList(new[] { new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem("(No categories - run migrations)", "0") }, "Value", "Text");
+                ModelState.AddModelError(string.Empty, "No categories found. Run migrations (see README_MIGRATIONS.md) and restart the app.");
+                return View();
+            }
+
             ViewBag.ProdCatId = new SelectList(categories, "CategoryId", "ProdCat");
-            return View(); // noop
+            ViewData["CategoriesList"] = categories;
+            _logger.LogInformation("Create GET - categories count: {Count}", System.Linq.Enumerable.Count(categories));
+            return View();
         }
 
         // POST: Products/Create
@@ -91,7 +102,29 @@ namespace EPareH60Store.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            // Log ModelState errors for debugging
+            if (!ModelState.IsValid)
+            {
+                foreach (var kv in ModelState)
+                {
+                    if (kv.Value.Errors.Count > 0)
+                    {
+                        foreach (var err in kv.Value.Errors)
+                        {
+                            _logger.LogWarning("ModelState error for {Key}: {Error}", kv.Key, err.ErrorMessage);
+                        }
+                    }
+                }
+            }
+
             var categories = await _categoryRepo.GetAllSortedAsync();
+            if (categories == null || !System.Linq.Enumerable.Any(categories))
+            {
+                ViewBag.ProdCatId = new SelectList(new[] { new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem("(No categories - run migrations)", "0") }, "Value", "Text");
+                ModelState.AddModelError(string.Empty, "No categories found. Run migrations (see README_MIGRATIONS.md) and restart the app.");
+                return View(product);
+            }
+
             ViewBag.ProdCatId = new SelectList(categories, "CategoryId", "ProdCat", product?.ProdCatId);
             return View(product);
         }
