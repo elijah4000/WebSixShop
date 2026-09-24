@@ -8,18 +8,19 @@
 
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="UpdatePrices">
+        <form asp-action="UpdatePrices" method="post">
+            @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="ProductID" />
             
             <div class="form-group">
                 <label for="buyPrice" class="control-label">Buy Price</label>
-                <input type="number" step="0.01" id="buyPrice" name="buyPrice" class="form-control" value="@Model.BuyPrice" required />
+                <input type="text" id="buyPrice" name="buyPrice" class="form-control" value="@Model.BuyPrice" required />
             </div>
 
             <div class="form-group mt-2">
                 <label for="sellPrice" class="control-label">Sell Price</label>
-                <input type="number" step="0.01" id="sellPrice" name="sellPrice" class="form-control" value="@Model.SellPrice" required />
+                <input type="text" id="sellPrice" name="sellPrice" class="form-control" value="@Model.SellPrice" required />
             </div>
 
             <div class="form-group mt-3">

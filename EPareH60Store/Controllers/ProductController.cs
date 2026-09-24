@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -46,7 +47,7 @@ namespace EPareH60Store.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateStock(int id, int stockChange)
+        public async Task<IActionResult> UpdateStock(int id, int stockChange = 1)
         {
             var product = await _productRepo.GetByIdWithCategoryAsync(id);
             if (product == null) return NotFound();
@@ -97,14 +98,20 @@ namespace EPareH60Store.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdatePrices(int id, decimal buyPrice, decimal sellPrice)
+        public async Task<IActionResult> UpdatePrices(int id, string buyPrice, string sellPrice)
         {
             var product = await _productRepo.GetByIdWithCategoryAsync(id);
             if (product == null) return NotFound();
 
             try
             {
-                product.UpdatePrices(buyPrice, sellPrice);
+                // Parse prices explicitly so non-numeric input causes an ArithmeticException as required
+                if (!decimal.TryParse(buyPrice, NumberStyles.Number, CultureInfo.InvariantCulture, out var buy))
+                    throw new ArithmeticException("Buy price is not a number.");
+                if (!decimal.TryParse(sellPrice, NumberStyles.Number, CultureInfo.InvariantCulture, out var sell))
+                    throw new ArithmeticException("Sell price is not a number.");
+
+                product.UpdatePrices(buy, sell);
                 await _productRepo.UpdateAsync(product);
                 return RedirectToAction(nameof(Index));
             }
