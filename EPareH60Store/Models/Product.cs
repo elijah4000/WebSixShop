@@ -66,7 +66,11 @@ public partial class Product
 
     public static async Task<IEnumerable<Product>> GetAllProductsAsync(H60assignmentDbEpContext context)
     {
-        return await context.Products.Include(p => p.Category).ToListAsync();
+        return await context.Products
+            .Include(p => p.Category)
+            .OrderBy(p => p.Category.ProdCat)
+            .ThenBy(p => p.Description)
+            .ToListAsync();
     }
 
     public static async Task<Product?> GetProductByIdAsync(H60assignmentDbEpContext context, int id)

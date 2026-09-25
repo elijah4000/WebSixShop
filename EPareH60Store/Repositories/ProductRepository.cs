@@ -19,13 +19,15 @@ namespace EPareH60Store.Repositories
         {
             return await _context.Products
                 .Include(p => p.Category)
-                .OrderBy(p => p.Description)
+                .OrderBy(p => p.Category.ProdCat)
+                .ThenBy(p => p.Description)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Product>> GetByCategorySortedAsync(int categoryId)
         {
             return await _context.Products
+                .Include(p => p.Category)
                 .Where(p => p.ProdCatId == categoryId)
                 .OrderBy(p => p.Description)
                 .ToListAsync();

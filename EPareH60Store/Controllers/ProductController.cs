@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using EPareH60Store.Models;
 using EPareH60Store.Repositories;
@@ -21,16 +22,24 @@ namespace EPareH60Store.Controllers
             _logger = logger;
         }
 
-        public async Task<IActionResult> Index(int? categoryId)
+        // Full product list: category, description, stock, sell price — sorted by category then product
+        public async Task<IActionResult> Index()
         {
-            if (categoryId.HasValue)
-            {
-                var categoryProducts = await _productRepo.GetByCategorySortedAsync(categoryId.Value);
-                return View(categoryProducts);
-            }
-
             var allProducts = await _productRepo.GetAllSortedAsync();
             return View(allProducts);
+        }
+
+        // Abbreviated list for one category: Description + SellPrice only
+        public async Task<IActionResult> ByCategory(int categoryId)
+        {
+            var category = await _categoryRepo.GetByIdAsync(categoryId);
+            if (category == null) return NotFound();
+
+            ViewData["CategoryName"] = category.ProdCat;
+            ViewData["CategoryId"] = categoryId;
+
+            var products = await _productRepo.GetByCategorySortedAsync(categoryId);
+            return View(products);
         }
 
         public async Task<IActionResult> Details(int id)
@@ -38,6 +47,74 @@ namespace EPareH60Store.Controllers
             var product = await _productRepo.GetByIdWithCategoryAsync(id);
             if (product == null) return NotFound();
             return View(product);
+        }
+
+        public async Task<IActionResult> Create()
+        {
+            await PopulateCategoriesDropDown();
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("ProdCatId,Description,Manufacturer,Stock,BuyPrice,SellPrice")] Product product)
+        {
+            if (ModelState.IsValid)
+            {
+                await _productRepo.AddAsync(product);
+                return RedirectToAction(nameof(Index));
+            }
+
+            LogModelStateErrors();
+            await PopulateCategoriesDropDown(product.ProdCatId);
+            return View(product);
+        }
+
+        public async Task<IActionResult> Edit(int id)
+        {
+            var product = await _productRepo.GetByIdWithCategoryAsync(id);
+            if (product == null) return NotFound();
+
+            await PopulateCategoriesDropDown(product.ProdCatId);
+            return View(product);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("ProductID,ProdCatId,Description,Manufacturer")] Product product)
+        {
+            if (id != product.ProductID) return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                var existing = await _productRepo.GetByIdWithCategoryAsync(id);
+                if (existing == null) return NotFound();
+
+                existing.ProdCatId = product.ProdCatId;
+                existing.Description = product.Description;
+                existing.Manufacturer = product.Manufacturer;
+                await _productRepo.UpdateAsync(existing);
+                return RedirectToAction(nameof(Index));
+            }
+
+            LogModelStateErrors();
+            await PopulateCategoriesDropDown(product.ProdCatId);
+            return View(product);
+        }
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            var product = await _productRepo.GetByIdWithCategoryAsync(id);
+            if (product == null) return NotFound();
+            return View(product);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            await _productRepo.DeleteAsync(id);
+            return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> UpdateStock(int id)
@@ -49,10 +126,16 @@ namespace EPareH60Store.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateStock(int id, int stockChange = 1)
+        public async Task<IActionResult> UpdateStock(int id, [BindRequired] int stockChange)
         {
             var product = await _productRepo.GetByIdWithCategoryAsync(id);
             if (product == null) return NotFound();
+
+            if (!ModelState.IsValid)
+            {
+                ModelState.AddModelError(nameof(stockChange), "Stock change amount is required.");
+                return View(product);
+            }
 
             try
             {
@@ -74,56 +157,6 @@ namespace EPareH60Store.Controllers
             return View(product);
         }
 
-        // GET: Products/Create
-        public async Task<IActionResult> Create()
-        {
-            var categories = await _categoryRepo.GetAllSortedAsync();
-            if (categories == null || !System.Linq.Enumerable.Any(categories))
-            {
-                ViewBag.ProdCatId = new SelectList(new[] { new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem("(No categories - run migrations)", "0") }, "Value", "Text");
-                ModelState.AddModelError(string.Empty, "No categories found. Run migrations (see README_MIGRATIONS.md) and restart the app.");
-                return View();
-            }
-
-            ViewBag.ProdCatId = new SelectList(categories, "CategoryId", "ProdCat");
-            _logger.LogInformation("Create GET - categories count: {Count}", System.Linq.Enumerable.Count(categories));
-            return View();
-        }
-
-        // POST: Products/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProdCatId,Description,Manufacturer,Stock,BuyPrice,SellPrice")] Product product)
-        {
-            if (ModelState.IsValid)
-            {
-                await _productRepo.AddAsync(product);
-                return RedirectToAction(nameof(Index));
-            }
-
-            foreach (var kv in ModelState)
-            {
-                if (kv.Value.Errors.Count > 0)
-                {
-                    foreach (var err in kv.Value.Errors)
-                    {
-                        _logger.LogWarning("ModelState error for {Key}: {Error}", kv.Key, err.ErrorMessage);
-                    }
-                }
-            }
-
-            var categories = await _categoryRepo.GetAllSortedAsync();
-            if (categories == null || !System.Linq.Enumerable.Any(categories))
-            {
-                ViewBag.ProdCatId = new SelectList(new[] { new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem("(No categories - run migrations)", "0") }, "Value", "Text");
-                ModelState.AddModelError(string.Empty, "No categories found. Run migrations (see README_MIGRATIONS.md) and restart the app.");
-                return View(product);
-            }
-
-            ViewBag.ProdCatId = new SelectList(categories, "CategoryId", "ProdCat", product?.ProdCatId);
-            return View(product);
-        }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdatePrices(int id, string buyPrice, string sellPrice)
@@ -133,7 +166,6 @@ namespace EPareH60Store.Controllers
 
             try
             {
-                // Parse prices explicitly so non-numeric input causes an ArithmeticException as required
                 if (!decimal.TryParse(buyPrice, NumberStyles.Number, CultureInfo.InvariantCulture, out var buy))
                     throw new ArithmeticException("Buy price is not a number.");
                 if (!decimal.TryParse(sellPrice, NumberStyles.Number, CultureInfo.InvariantCulture, out var sell))
@@ -150,6 +182,28 @@ namespace EPareH60Store.Controllers
             }
         }
 
-      
+        private async Task PopulateCategoriesDropDown(int? selectedId = null)
+        {
+            var categories = await _categoryRepo.GetAllSortedAsync();
+            if (categories == null || !System.Linq.Enumerable.Any(categories))
+            {
+                ViewBag.ProdCatId = new SelectList(new[] { new SelectListItem("(No categories)", "0") }, "Value", "Text");
+                ModelState.AddModelError(string.Empty, "No categories found.");
+                return;
+            }
+
+            ViewBag.ProdCatId = new SelectList(categories, "CategoryId", "ProdCat", selectedId);
+        }
+
+        private void LogModelStateErrors()
+        {
+            foreach (var kv in ModelState)
+            {
+                foreach (var err in kv.Value.Errors)
+                {
+                    _logger.LogWarning("ModelState error for {Key}: {Error}", kv.Key, err.ErrorMessage);
+                }
+            }
+        }
     }
 }

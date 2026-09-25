@@ -1,0 +1,34 @@
+@model IEnumerable<EPareH60Store.Models.Product>
+
+@{
+    ViewData["Title"] = "Products by Category";
+    var categoryName = ViewData["CategoryName"] as string ?? "Category";
+}
+
+<h1>Products in @categoryName</h1>
+<p class="text-muted">Description and sell price only</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.Description)</th>
+            <th>@Html.DisplayNameFor(model => model.SellPrice)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => item.Description)</td>
+            <td>@Html.DisplayFor(modelItem => item.SellPrice)</td>
+            <td>
+                <a asp-action="Details" asp-route-id="@item.ProductID">Details</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+<p>
+    <a asp-controller="Categories" asp-action="Index" class="btn btn-secondary">Back to Categories</a>
+</p>

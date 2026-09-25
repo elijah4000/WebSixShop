@@ -19,8 +19,9 @@
 
             <div class="form-group">
                 <label for="stockChange" class="control-label">Stock Change Amount</label>
-                <input type="number" id="stockChange" name="stockChange" class="form-control" value="1" required />
-                <span class="text-muted">Use a positive number to add, or a negative number to reduce stock.</span>
+                <input type="number" id="stockChange" name="stockChange" class="form-control" required />
+                <span class="text-danger">@Html.ValidationMessage("stockChange")</span>
+                <span class="text-muted d-block">Required. Use a positive number to add, or a negative number to reduce stock.</span>
             </div>
 
             <div class="form-group mt-3">

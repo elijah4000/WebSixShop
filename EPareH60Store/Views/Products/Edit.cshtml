@@ -8,7 +8,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="ProductID" />
             
@@ -28,9 +28,6 @@
                 <span asp-validation-for="Manufacturer" class="text-danger"></span>
             </div>
             
-            <!-- Stock and Prices omitted from Edit per typical business rules, 
-                 handled by the dedicated UpdateStock and UpdatePrices actions -->
-                 
             <div class="form-group mt-3">
                 <input type="submit" value="Save" class="btn btn-primary" />
                 <a asp-action="Index" class="btn btn-secondary">Back to List</a>
@@ -38,3 +35,7 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
