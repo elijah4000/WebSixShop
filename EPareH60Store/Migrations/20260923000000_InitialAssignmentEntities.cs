@@ -126,8 +126,29 @@ namespace EPareH60Store.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            // Seed via SQL — Designer has no model snapshot, so InsertData cannot resolve table mappings
+            // Seed customers/cart/order only. Use existing Product rows (do not insert products/categories).
             migrationBuilder.Sql(@"
+DECLARE @p1 int, @p2 int;
+DECLARE @price1 numeric(8,2), @price2 numeric(8,2);
+
+SELECT TOP 1 @p1 = [ProductID], @price1 = ISNULL([SellPrice], 9.99)
+FROM [Product]
+ORDER BY [ProductID];
+
+SELECT TOP 1 @p2 = [ProductID], @price2 = ISNULL([SellPrice], 19.99)
+FROM [Product]
+WHERE [ProductID] <> @p1
+ORDER BY [ProductID];
+
+IF @p1 IS NULL
+    THROW 50001, 'Product table has no rows. Add at least one product before running this migration.', 1;
+
+IF @p2 IS NULL
+BEGIN
+    SET @p2 = @p1;
+    SET @price2 = @price1;
+END
+
 SET IDENTITY_INSERT [Customer] ON;
 INSERT INTO [Customer] ([CustomerId], [FirstName], [LastName], [Email], [PhoneNumber], [Province], [CreditCard]) VALUES
  (1, N'Alice', N'Smith', N'alice@example.com', N'1234567890', N'ON', NULL),
@@ -145,17 +166,19 @@ INSERT INTO [Order] ([OrderId], [CustomerId], [DateCreated], [DateFulfilled], [T
  (1, 1, DATEADD(day, -10, CAST(GETUTCDATE() AS date)), DATEADD(day, -5, CAST(GETUTCDATE() AS date)), 59.97, 5.00);
 SET IDENTITY_INSERT [Order] OFF;
 
+-- Cart: 2 products, one with quantity > 1
 SET IDENTITY_INSERT [CartItem] ON;
 INSERT INTO [CartItem] ([CartItemId], [CartId], [ProductId], [Quantity], [Price]) VALUES
- (1, 1, 1, 2, 9.99),
- (2, 1, 2, 1, 19.99);
+ (1, 1, @p1, 2, @price1),
+ (2, 1, @p2, 1, @price2);
 SET IDENTITY_INSERT [CartItem] OFF;
 
+-- Order: at least 3 line items (reuse products if only 2 exist)
 SET IDENTITY_INSERT [OrderItem] ON;
 INSERT INTO [OrderItem] ([OrderItemId], [OrderId], [ProductId], [Quantity], [Price]) VALUES
- (1, 1, 1, 1, 9.99),
- (2, 1, 2, 1, 19.99),
- (3, 1, 3, 1, 29.99);
+ (1, 1, @p1, 1, @price1),
+ (2, 1, @p2, 1, @price2),
+ (3, 1, @p1, 1, @price1);
 SET IDENTITY_INSERT [OrderItem] OFF;
 ");
 
