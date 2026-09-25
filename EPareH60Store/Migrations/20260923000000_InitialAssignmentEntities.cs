@@ -48,7 +48,7 @@ namespace EPareH60Store.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "[Order]",
+                name: "Order",
                 columns: table => new
                 {
                     OrderId = table.Column<int>(type: "int", nullable: false)
@@ -115,7 +115,7 @@ namespace EPareH60Store.Migrations
                     table.ForeignKey(
                         name: "FK_OrderItem_Order_OrderId",
                         column: x => x.OrderId,
-                        principalTable: "[Order]",
+                        principalTable: "Order",
                         principalColumn: "OrderId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -126,49 +126,38 @@ namespace EPareH60Store.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            // seed customers
-            migrationBuilder.InsertData(
-                table: "Customer",
-                columns: new[] { "CustomerId", "FirstName", "LastName", "Email", "PhoneNumber", "Province", "CreditCard" },
-                values: new object[,]
-                {
-                    { 1, "Alice", "Smith", "alice@example.com", "1234567890", "ON", null },
-                    { 2, "Bob", "Jones", "bob@example.com", "2345678901", "QC", null },
-                    { 3, "Carol", "Brown", "carol@example.com", "3456789012", "BC", null }
-                });
+            // Seed via SQL — Designer has no model snapshot, so InsertData cannot resolve table mappings
+            migrationBuilder.Sql(@"
+SET IDENTITY_INSERT [Customer] ON;
+INSERT INTO [Customer] ([CustomerId], [FirstName], [LastName], [Email], [PhoneNumber], [Province], [CreditCard]) VALUES
+ (1, N'Alice', N'Smith', N'alice@example.com', N'1234567890', N'ON', NULL),
+ (2, N'Bob', N'Jones', N'bob@example.com', N'2345678901', N'QC', NULL),
+ (3, N'Carol', N'Brown', N'carol@example.com', N'3456789012', N'BC', NULL);
+SET IDENTITY_INSERT [Customer] OFF;
 
-            // seed shopping cart
-            migrationBuilder.InsertData(
-                table: "ShoppingCart",
-                columns: new[] { "CartId", "CustomerId", "DateCreated" },
-                values: new object[] { 1, 2, DateTime.UtcNow.Date });
+SET IDENTITY_INSERT [ShoppingCart] ON;
+INSERT INTO [ShoppingCart] ([CartId], [CustomerId], [DateCreated]) VALUES
+ (1, 2, CAST(GETUTCDATE() AS date));
+SET IDENTITY_INSERT [ShoppingCart] OFF;
 
-            // seed order
-            migrationBuilder.InsertData(
-                table: "[Order]",
-                columns: new[] { "OrderId", "CustomerId", "DateCreated", "DateFulfilled", "Total", "Taxes" },
-                values: new object[] { 1, 1, DateTime.UtcNow.Date.AddDays(-10), DateTime.UtcNow.Date.AddDays(-5), 59.97m, 5.00m });
+SET IDENTITY_INSERT [Order] ON;
+INSERT INTO [Order] ([OrderId], [CustomerId], [DateCreated], [DateFulfilled], [Total], [Taxes]) VALUES
+ (1, 1, DATEADD(day, -10, CAST(GETUTCDATE() AS date)), DATEADD(day, -5, CAST(GETUTCDATE() AS date)), 59.97, 5.00);
+SET IDENTITY_INSERT [Order] OFF;
 
-            // seed cart items (must reference existing product ids)
-            migrationBuilder.InsertData(
-                table: "CartItem",
-                columns: new[] { "CartItemId", "CartId", "ProductId", "Quantity", "Price" },
-                values: new object[,]
-                {
-                    { 1, 1, 1, 2, 9.99m },
-                    { 2, 1, 2, 1, 19.99m }
-                });
+SET IDENTITY_INSERT [CartItem] ON;
+INSERT INTO [CartItem] ([CartItemId], [CartId], [ProductId], [Quantity], [Price]) VALUES
+ (1, 1, 1, 2, 9.99),
+ (2, 1, 2, 1, 19.99);
+SET IDENTITY_INSERT [CartItem] OFF;
 
-            // seed order items
-            migrationBuilder.InsertData(
-                table: "OrderItem",
-                columns: new[] { "OrderItemId", "OrderId", "ProductId", "Quantity", "Price" },
-                values: new object[,]
-                {
-                    { 1, 1, 1, 1, 9.99m },
-                    { 2, 1, 2, 1, 19.99m },
-                    { 3, 1, 3, 1, 29.99m }
-                });
+SET IDENTITY_INSERT [OrderItem] ON;
+INSERT INTO [OrderItem] ([OrderItemId], [OrderId], [ProductId], [Quantity], [Price]) VALUES
+ (1, 1, 1, 1, 9.99),
+ (2, 1, 2, 1, 19.99),
+ (3, 1, 3, 1, 29.99);
+SET IDENTITY_INSERT [OrderItem] OFF;
+");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ShoppingCart_CustomerId",
@@ -187,7 +176,7 @@ namespace EPareH60Store.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_Order_CustomerId",
-                table: "[Order]",
+                table: "Order",
                 column: "CustomerId");
 
             migrationBuilder.CreateIndex(
@@ -203,20 +192,13 @@ namespace EPareH60Store.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DeleteData("OrderItem", "OrderItemId", 1);
-            migrationBuilder.DeleteData("OrderItem", "OrderItemId", 2);
-            migrationBuilder.DeleteData("OrderItem", "OrderItemId", 3);
-
-            migrationBuilder.DeleteData("CartItem", "CartItemId", 1);
-            migrationBuilder.DeleteData("CartItem", "CartItemId", 2);
-
-            migrationBuilder.DeleteData("[Order]", "OrderId", 1);
-
-            migrationBuilder.DeleteData("ShoppingCart", "CartId", 1);
-
-            migrationBuilder.DeleteData("Customer", "CustomerId", 1);
-            migrationBuilder.DeleteData("Customer", "CustomerId", 2);
-            migrationBuilder.DeleteData("Customer", "CustomerId", 3);
+            migrationBuilder.Sql(@"
+DELETE FROM [OrderItem];
+DELETE FROM [CartItem];
+DELETE FROM [Order];
+DELETE FROM [ShoppingCart];
+DELETE FROM [Customer];
+");
 
             migrationBuilder.DropTable(
                 name: "OrderItem");
@@ -225,7 +207,7 @@ namespace EPareH60Store.Migrations
                 name: "CartItem");
 
             migrationBuilder.DropTable(
-                name: "[Order]");
+                name: "Order");
 
             migrationBuilder.DropTable(
                 name: "ShoppingCart");

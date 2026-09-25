@@ -58,6 +58,20 @@ public partial class H60assignmentDbEpContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Product_ProductCategory");
         });
+
+        modelBuilder.Entity<Customer>(entity =>
+        {
+            entity.ToTable("Customer");
+            entity.HasOne(c => c.ShoppingCart)
+                .WithOne(sc => sc.Customer)
+                .HasForeignKey<ShoppingCart>(sc => sc.CustomerId);
+        });
+
+        modelBuilder.Entity<ShoppingCart>(entity => entity.ToTable("ShoppingCart"));
+        modelBuilder.Entity<CartItem>(entity => entity.ToTable("CartItem"));
+        modelBuilder.Entity<Order>(entity => entity.ToTable("Order"));
+        modelBuilder.Entity<OrderItem>(entity => entity.ToTable("OrderItem"));
+
         // Seed product categories (at least 5) and products (at least 4 per category)
         modelBuilder.Entity<ProductCategory>().HasData(
             new ProductCategory { CategoryId = 1, ProdCat = "Electronics" },
