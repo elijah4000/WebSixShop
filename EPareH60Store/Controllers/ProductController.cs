@@ -28,7 +28,6 @@ namespace EPareH60Store.Controllers
             return View(allProducts);
         }
 
-        // Abbreviated list for one category: Description + SellPrice only
         public async Task<IActionResult> ByCategory(int categoryId)
         {
             var category = await _categoryRepo.GetByIdAsync(categoryId);
