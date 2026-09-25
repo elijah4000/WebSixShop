@@ -35,10 +35,17 @@ public partial class H60assignmentDbEpContext : DbContext
             entity.ToTable("Product");
 
             entity.HasKey(e => e.ProductID);
+            entity.Ignore(e => e.ProductId);
+            entity.Ignore(e => e.Product_Id_Alias);
+            entity.Ignore(e => e.BuyPrice_DisplayAlias);
 
             entity.HasIndex(e => e.ProdCatId, "IX_Product_ProdCatId");
 
-            entity.Property(e => e.ProductID).HasColumnName("ProductID");
+            // DB column is IDENTITY; seeded HasData IDs must not make EF send ProductID=0 on insert
+            entity.Property(e => e.ProductID)
+                .HasColumnName("ProductID")
+                .ValueGeneratedOnAdd();
+
             entity.Property(e => e.BuyPrice).HasColumnType("numeric(8, 2)");
             entity.Property(e => e.Description).HasMaxLength(80).IsUnicode(false);
             entity.Property(e => e.Manufacturer).HasMaxLength(80).IsUnicode(false);
@@ -118,12 +125,15 @@ public partial class H60assignmentDbEpContext : DbContext
 
         modelBuilder.Entity<ProductCategory>(entity =>
         {
-            // No-op marker: separate seed changes for ProductCategory
             entity.HasKey(pc => pc.CategoryId);
+            entity.Ignore(pc => pc.CategoryID);
 
             entity.ToTable("ProductCategory");
 
-            entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
+            entity.Property(e => e.CategoryId)
+                .HasColumnName("CategoryID")
+                .ValueGeneratedOnAdd();
+
             entity.Property(e => e.ProdCat).HasMaxLength(60).IsUnicode(false);
 
             entity.HasMany(pc => pc.Products)
