@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
@@ -32,6 +33,9 @@ public partial class Product
     [NotMapped]
     public decimal? BuyPrice_DisplayAlias { get => BuyPrice; set => BuyPrice = value; }
 
+    // Navigation property is loaded by EF; form posts only ProdCatId.
+    // Without ValidateNever, nullable-enabled validation requires Category and blocks Create.
+    [ValidateNever]
     public virtual ProductCategory Category { get; set; } = null!;
 
     public void UpdateStock(int stockChange)

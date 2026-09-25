@@ -86,7 +86,6 @@ namespace EPareH60Store.Controllers
             }
 
             ViewBag.ProdCatId = new SelectList(categories, "CategoryId", "ProdCat");
-            ViewData["CategoriesList"] = categories;
             _logger.LogInformation("Create GET - categories count: {Count}", System.Linq.Enumerable.Count(categories));
             return View();
         }
@@ -102,17 +101,13 @@ namespace EPareH60Store.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Log ModelState errors for debugging
-            if (!ModelState.IsValid)
+            foreach (var kv in ModelState)
             {
-                foreach (var kv in ModelState)
+                if (kv.Value.Errors.Count > 0)
                 {
-                    if (kv.Value.Errors.Count > 0)
+                    foreach (var err in kv.Value.Errors)
                     {
-                        foreach (var err in kv.Value.Errors)
-                        {
-                            _logger.LogWarning("ModelState error for {Key}: {Error}", kv.Key, err.ErrorMessage);
-                        }
+                        _logger.LogWarning("ModelState error for {Key}: {Error}", kv.Key, err.ErrorMessage);
                     }
                 }
             }
