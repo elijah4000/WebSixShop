@@ -16,16 +16,15 @@ public partial class H60assignmentDbEpContext : DbContext
     }
 
     public virtual DbSet<Product> Products { get; set; }
-    public virtual DbSet<ProductCategory> ProductCategories { get; set; } // modified
+    public virtual DbSet<ProductCategory> ProductCategories { get; set; } 
 
-    // Code-first DbSets for customer/order/cart functionality
     public virtual DbSet<Customer> Customers { get; set; }
     public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; }
     public virtual DbSet<CartItem> CartItems { get; set; }
     public virtual DbSet<Order> Orders { get; set; }
     public virtual DbSet<OrderItem> OrderItems { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) //todo this can proabably be changed probably bad security
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) 
         => optionsBuilder.UseSqlServer("Server=tcp:csdevsql.cegep-heritage.qc.ca,1433; Database=H60AssignmentDB_EP;Authentication=Active Directory Interactive; Encrypt=True; TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -41,7 +40,6 @@ public partial class H60assignmentDbEpContext : DbContext
 
             entity.HasIndex(e => e.ProdCatId, "IX_Product_ProdCatId");
 
-            // DB column is IDENTITY; seeded HasData IDs must not make EF send ProductID=0 on insert
             entity.Property(e => e.ProductID)
                 .HasColumnName("ProductID")
                 .ValueGeneratedOnAdd();
@@ -72,7 +70,6 @@ public partial class H60assignmentDbEpContext : DbContext
         modelBuilder.Entity<Order>(entity => entity.ToTable("Order"));
         modelBuilder.Entity<OrderItem>(entity => entity.ToTable("OrderItem"));
 
-        // Part B seed only (Product/ProductCategory already exist from the SQL template / manual data)
         modelBuilder.Entity<Customer>().HasData(
             new Customer { CustomerId = 1, FirstName = "Alice", LastName = "Smith", Email = "alice@example.com", PhoneNumber = "1234567890", Province = "ON", CreditCard = null },
             new Customer { CustomerId = 2, FirstName = "Bob", LastName = "Jones", Email = "bob@example.com", PhoneNumber = "2345678901", Province = "QC", CreditCard = null },
@@ -87,7 +84,6 @@ public partial class H60assignmentDbEpContext : DbContext
             new Order { OrderId = 1, CustomerId = 1, DateCreated = new DateTime(2026, 1, 5), DateFulfilled = new DateTime(2026, 1, 10), Total = 59.97m, Taxes = 5.00m }
         );
 
-        // CartItem / OrderItem seeded in the migration SQL using whatever ProductIDs already exist
 
         modelBuilder.Entity<ProductCategory>(entity =>
         {
