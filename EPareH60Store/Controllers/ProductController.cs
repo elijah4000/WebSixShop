@@ -22,7 +22,6 @@ namespace EPareH60Store.Controllers
             _logger = logger;
         }
 
-        // Full product list: category, description, stock, sell price — sorted by category then product
         public async Task<IActionResult> Index()
         {
             var allProducts = await _productRepo.GetAllSortedAsync();
